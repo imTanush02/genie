@@ -16,5 +16,5 @@ function ping_server() {
 	done
 }
 
-ping_server &
-cd /home/user && npx next dev --turbopack
+cd /home/user && npx next dev --turbopack &
+ping_server
