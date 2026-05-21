@@ -3,10 +3,8 @@ import { inngest } from "./client";
 import { gemini, createAgent, createTool, createNetwork } from "@inngest/agent-kit";
 import { Sandbox } from "@e2b/code-interpreter";
 import { getSandbox, lastAssistantTextMessageContent } from "./utils";
-import { stderr, stdout, title } from "process";
 import z from "zod";
 import { PROMPT } from "@/prompt";
-import { url } from "inspector";
 
 
 export const processTask = inngest.createFunction(
