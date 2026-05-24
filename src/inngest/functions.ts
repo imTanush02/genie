@@ -1,15 +1,19 @@
 // src/inngest/functions.ts
 import { inngest } from "./client";
-import { gemini, createAgent, createTool, createNetwork, grok, openai } from "@inngest/agent-kit";
+import { gemini, createAgent, createTool, createNetwork, grok, openai, type Tool } from "@inngest/agent-kit";
 import { Sandbox } from "@e2b/code-interpreter";
 import { getSandbox, lastAssistantTextMessageContent } from "./utils";
 import z from "zod";
 import { PROMPT } from "@/prompt";
 import prisma from "@/lib/db";
 
+interface AgentState {
+  summary: string;
+  files: {[path:string]: string};
+}
 
-export const processTask = inngest.createFunction(
-  { id: "process-task", triggers: { event: "code-agent/run" } },
+export const codeAgentFunction = inngest.createFunction(
+  { id: "code-agent", triggers: { event: "code-agent/run" } },
   async ({ event, step }) => {
     const sandboxId = await step.run("get-sandbox-id", async () => {
       const sandbox = await Sandbox.create({
@@ -17,7 +21,7 @@ export const processTask = inngest.createFunction(
       })
       return sandbox.sandboxId
     })
-    const codeAgent = createAgent({
+    const codeAgent = createAgent<AgentState>({
       name: 'codeAgent',
       description: "expert coding agent , use this to generate code for the prompt given to you",
       system: PROMPT,
@@ -74,7 +78,7 @@ export const processTask = inngest.createFunction(
               content: z.string()
             }))
           }),
-          handler: async ({ files }, { step, network }) => {
+          handler: async ({ files }, { step, network }:Tool.Options<AgentState>) => {
             const newFiles = await step?.run("createOrUpdateFiles", async () => {
               try {
                 const updateFiles = network.state.data.files || {}
@@ -138,7 +142,7 @@ export const processTask = inngest.createFunction(
       },
     });
 
-    const network = createNetwork({
+    const network = createNetwork<AgentState>({
       name: "coding-agent-network",
       agents: [codeAgent],
       maxIter: 15,
