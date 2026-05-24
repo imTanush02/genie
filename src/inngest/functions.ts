@@ -5,10 +5,11 @@ import { Sandbox } from "@e2b/code-interpreter";
 import { getSandbox, lastAssistantTextMessageContent } from "./utils";
 import z from "zod";
 import { PROMPT } from "@/prompt";
+import prisma from "@/lib/db";
 
 
 export const processTask = inngest.createFunction(
-  { id: "process-task", triggers: { event: "app/task.created" } },
+  { id: "process-task", triggers: { event: "code-agent/run" } },
   async ({ event, step }) => {
     const sandboxId = await step.run("get-sandbox-id", async () => {
       const sandbox = await Sandbox.create({
@@ -29,7 +30,7 @@ export const processTask = inngest.createFunction(
 
       // ========== OPTION 2: OpenRouter (Free Models) ==========
       model: openai({
-        model: "openrouter/auto",
+        model: "google/gemini-2.0-flash-001",
         baseUrl: 'https://openrouter.ai/api/v1/',
         apiKey: process.env.OPENROUTER_API_KEY,
       }),
@@ -157,6 +158,23 @@ export const processTask = inngest.createFunction(
       const host = await sandbox.getHost(3000);
       return `https://${host}`
     });
+
+    await step.run("save-result", async () => {
+      return await prisma.message.create({
+        data: {
+          content: result.state.data.summary ?? "Task completed.",
+          type: "RESULT",
+          role: "ASSISTANT",
+          fragment: {
+            create: {
+              sandboxUrl: sandboxUrl,
+              files: result.state.data.files ?? {},
+              title: "fragment"
+            }
+          }
+        }
+      })
+    })
 
     return {
       url: sandboxUrl,
