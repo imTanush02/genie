@@ -151,7 +151,16 @@ export const processTask = inngest.createFunction(
       }
     })
 
-    const result = await network.run(event.data.value);
+    let result: Awaited<ReturnType<typeof network.run>>;
+    let networkError: string | null = null;
+
+    try {
+      result = await network.run(event.data.value);
+      console.log("network result: ", result);
+    } catch (err) {
+      networkError = err instanceof Error ? err.message : "Task failed.";
+      console.error("network error: ", err);
+    }
 
     const sandboxUrl = await step.run("get-sandbox-url", async () => {
       const sandbox = await getSandbox(sandboxId);
@@ -160,15 +169,26 @@ export const processTask = inngest.createFunction(
     });
 
     await step.run("save-result", async () => {
+      if(networkError){
+        return await prisma.message.create({
+          data: {
+            content: networkError ?? "Task failed.",
+            type: "ERROR",
+            role: "ASSISTANT",
+            projectId: event.data.projectId,
+          }
+        })
+      }
       return await prisma.message.create({
         data: {
-          content: result.state.data.summary ?? "Task completed.",
+          content: result!.state.data.summary ?? "Task completed.",
           type: "RESULT",
           role: "ASSISTANT",
+          projectId: event.data.projectId,
           fragment: {
             create: {
               sandboxUrl: sandboxUrl,
-              files: result.state.data.files ?? {},
+              files: result!.state.data.files ?? {},
               title: "fragment"
             }
           }
@@ -179,8 +199,8 @@ export const processTask = inngest.createFunction(
     return {
       url: sandboxUrl,
       title: "Fragment",
-      files: result.state.data.files,
-      summary: result.state.data.summary
+      files: result!.state.data.files,
+      summary: result!.state.data.summary
     };
   }
 );
