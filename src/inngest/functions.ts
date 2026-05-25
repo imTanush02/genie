@@ -93,7 +93,7 @@ export const codeAgentFunction = inngest.createFunction(
                 return `File creation failed : ${e}`;
               }
             })
-            if (typeof newFiles !== "string") {
+            if (newFiles && typeof newFiles !== "string") {
               network.state.data.files = newFiles;
             }
 
