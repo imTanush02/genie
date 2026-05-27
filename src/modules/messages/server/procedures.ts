@@ -5,25 +5,34 @@ import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import prisma from "@/lib/db";
 
 export const messageRouter = createTRPCRouter({
-    getMany:baseProcedure.query( async ()=>{
-        const messages = await prisma.message.findMany({
-            orderBy:{
-                updatedAt:"desc"
-            },
-            include:{
-                fragment:true
-            }
-        })
-        return messages
+  getMany: baseProcedure
+    .input(
+      z.object({          
+        projectId: z.string().min(1, { message: "Project is Required" }),
+      }),
+    )
+    .query(async ({input}) => {
+      const messages = await prisma.message.findMany({
+        where :{
+          projectId:input.projectId
+        },
+        orderBy: {
+          updatedAt: "asc",
+        },
+        include: {
+          fragment: true,
+        },
+      });
+      return messages;
     }),
   create: baseProcedure
     .input(
       z.object({
-       value: z.string()
+        value: z
+          .string()
           .min(1, { message: "Message is Required" })
           .max(10000, { message: "Message is too long" }),
-        projectId: z.string()
-        .min(1, { message: "Project is Required" })
+        projectId: z.string().min(1, { message: "Project is Required" }),
       }),
     )
     .mutation(async ({ input }) => {
@@ -37,10 +46,8 @@ export const messageRouter = createTRPCRouter({
       });
       await inngest.send({
         name: "code-agent/run",
-        data: { value: input.value , projectId: input.projectId},   
+        data: { value: input.value, projectId: input.projectId },
       });
       return createdMessage;
     }),
-
-  
 });
