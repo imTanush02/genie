@@ -6,6 +6,7 @@ import { Fragment } from "@/generated/prisma/client";
 
 import { MessageCard } from "./message-card";
 import { MessageForm } from "./message-form";
+import { MessageLoading } from "./message-loading";
 // import { MessageLoading } from "./message-loading";
 
 interface Props {
@@ -66,7 +67,7 @@ export const MessagesContainer = ({
               type={message.type}
             />
           ))}
-          {/* {isLastMessageUser && <MessageLoading />} */}
+          {isLastMessageUser && <MessageLoading />}
           <div ref={bottomRef} />
         </div>
       </div>
