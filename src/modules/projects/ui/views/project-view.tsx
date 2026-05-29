@@ -10,6 +10,8 @@ import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense, useState } from "react";
 import { Fragment } from "@/generated/prisma/client";
+import { ErrorBoundary } from "next/dist/client/components/error-boundary";
+import { ProjectHeader } from "../components/project-header";
 interface Props {
   projectId: string;
 }
@@ -25,6 +27,12 @@ export const ProjectView = ({ projectId }: Props) => {
           minSize={20}
           className=" flex flex-col min-h-0"
         >
+          {/* <ErrorBoundary fallbac={<p>Project header error</p>}> */}
+            <Suspense fallback={<p>Loading project...</p>}>
+              <ProjectHeader projectId={projectId} />
+            </Suspense>
+          {/* </ErrorBoundary> */}
+          {/* <ErrorBoundary fallback={<p>Messages container error</p>}></ErrorBoundary> */}
           <Suspense fallback={"Loading Messages"}>
             <MessagesContainer 
               projectId={projectId} 
