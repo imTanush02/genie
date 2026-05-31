@@ -1,24 +1,36 @@
 "use client";
 
+import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
+import { Suspense, useState } from "react";
+import { EyeIcon, CodeIcon, CrownIcon } from "lucide-react";
+
+import { Fragment } from "@/generated/prisma/client";
+import { Button } from "@/components/ui/button";
+// import { UserControl } from "@/components/user-control";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { MessagesContainer } from "@/modules/projects/ui/components/messages-container";
-import { useTRPC } from "@/trpc/client";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { Suspense, useState } from "react";
-import { Fragment } from "@/generated/prisma/client";
-import { ErrorBoundary } from "next/dist/client/components/error-boundary";
-import { ProjectHeader } from "../components/project-header";
+
 import { FragmentWeb } from "../components/fragment-web";
+import { ProjectHeader } from "../components/project-header";
+import { MessagesContainer } from "../components/messages-container";
+import { ErrorBoundary } from "react-error-boundary";
+import { FileExplorer } from "@/components/file-explorer";
+
 interface Props {
   projectId: string;
-}
+};
 
 export const ProjectView = ({ projectId }: Props) => {
+  const { has } = useAuth();
+  const hasProAccess = has?.({ plan: "pro" });
+
   const [activeFragment, setActiveFragment] = useState<Fragment | null>(null);
+  const [tabState, setTabState] = useState<"preview" | "code">("preview");
 
   return (
     <div className="h-screen">
@@ -26,30 +38,71 @@ export const ProjectView = ({ projectId }: Props) => {
         <ResizablePanel
           defaultSize={35}
           minSize={20}
-          className=" flex flex-col min-h-0"
+          className="flex flex-col min-h-0"
         >
-          {/* <ErrorBoundary fallbac={<p>Project header error</p>}> */}
+          <ErrorBoundary fallback={<p>Project header error</p>}>
             <Suspense fallback={<p>Loading project...</p>}>
               <ProjectHeader projectId={projectId} />
             </Suspense>
-          {/* </ErrorBoundary> */}
-          {/* <ErrorBoundary fallback={<p>Messages container error</p>}></ErrorBoundary> */}
-          <Suspense fallback={"Loading Messages"}>
-            <MessagesContainer 
-              projectId={projectId} 
-              activeFragment={activeFragment} 
-              setActiveFragment={setActiveFragment} 
-            />
-          </Suspense>
+          </ErrorBoundary>
+          <ErrorBoundary fallback={<p>Messages container error</p>}>
+            <Suspense fallback={<p>Loading messages...</p>}>
+              <MessagesContainer
+                projectId={projectId}
+                activeFragment={activeFragment}
+                setActiveFragment={setActiveFragment}
+              />
+            </Suspense>
+          </ErrorBoundary>
         </ResizablePanel>
-        <ResizableHandle withHandle />
+
+
+        <ResizableHandle className="hover:bg-primary transition-colors" />
+
+        
         <ResizablePanel
           defaultSize={65}
           minSize={50}
-          className=" flex flex-col min-h-0"
         >
-             {!!activeFragment && <FragmentWeb data={activeFragment} />}
+          <Tabs
+            className="h-full gap-y-0 flex flex-col"
+            defaultValue="preview"
+            value={tabState}
+            onValueChange={(value) => setTabState(value as "preview" | "code")}
+          >
+            <div className="w-full flex items-center p-2 border-b gap-x-2">
+              <TabsList className="h-8 p-0 border rounded-md">
+                <TabsTrigger value="preview" className="rounded-md">
+                  <EyeIcon /> <span>Demo</span>
+                </TabsTrigger>
+                <TabsTrigger value="code" className="rounded-md">
+                  <CodeIcon /> <span>Code</span>
+                </TabsTrigger>
+              </TabsList>
+              <div className="ml-auto flex items-center gap-x-2">
+                {!hasProAccess && (
+                  <Button asChild size="sm" variant="outline">
+                    <Link href="/pricing">
+                      <CrownIcon /> Upgrade
+                    </Link>
+                  </Button>
+                )}
+                {/* <UserControl /> */}
+              </div>
+            </div>
+            <TabsContent value="preview">
+              {!!activeFragment && <FragmentWeb data={activeFragment} />}
+            </TabsContent>
+            <TabsContent value="code" className="min-h-0">
+              {!!activeFragment?.files && (
+                <FileExplorer
+                  files={activeFragment.files as { [path: string]: string }}
+                />
+              )}
+            </TabsContent>
+          </Tabs>
         </ResizablePanel>
+        
       </ResizablePanelGroup>
     </div>
   );
