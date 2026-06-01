@@ -1,6 +1,6 @@
 // src/inngest/functions.ts
 import { inngest } from "./client";
-import { gemini, createAgent, createTool, createNetwork, grok, openai, type Tool } from "@inngest/agent-kit";
+import { createAgent, createTool, createNetwork, openai, type Tool } from "@inngest/agent-kit";
 import { Sandbox } from "@e2b/code-interpreter";
 import { getSandbox, lastAssistantTextMessageContent } from "./utils";
 import z from "zod";

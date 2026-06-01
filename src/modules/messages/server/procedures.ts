@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { TRPCError } from "@trpc/server";
 import { inngest } from "@/inngest/client";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import prisma from "@/lib/db";
