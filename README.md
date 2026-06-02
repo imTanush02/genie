@@ -1,11 +1,11 @@
 # ✨ Genie - AI-Powered Code Execution Platform
 
-A modern, full-stack AI-powered code execution platform built with **Next.js 15**, **TypeScript**, and **React 19**. Execute code in secure sandboxes, generate code with AI, and automate workflows—all with a beautiful, responsive UI.
+A modern, full-stack AI-powered code execution platform built with **Next.js 15**, **TypeScript**, and **React 19**. Execute code in secure sandboxes, generate code with AI, and automate workflows—all in one place.
 
 ## 🎯 Overview
 
 **Genie** is a production-ready platform that combines:
-- 🤖 **AI-Powered Code Generation** - Convert natural language to executable code
+- 🤖 **AI-Powered Code Generation** - Natural language to executable code
 - 🔒 **Secure Code Sandboxes** - Execute code safely in isolated environments
 - 👤 **User Authentication** - Enterprise-grade auth with Clerk
 - 📊 **Real-time Execution** - Instant code execution with streaming results
@@ -14,182 +14,86 @@ A modern, full-stack AI-powered code execution platform built with **Next.js 15*
 
 ## 🏗️ Architecture
 
-### System Flow Diagram
+### System Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              USER INTERFACE LAYER                            │
-│                                                                              │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  Next.js 15 + React 19 (Frontend)                                   │  │
-│  │  - Pages built with App Router (app/page.tsx)                       │  │
-│  │  - Components: Radix UI, Shadcn, Lucide Icons                       │  │
-│  │  - Styling: Tailwind CSS v4 + PostCSS                              │  │
-│  │  - State Management: TanStack React Query                           │  │
-│  │  - Forms: React Hook Form + Zod Validation                          │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    ↓
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                          AUTHENTICATION LAYER                                │
-│                                                                              │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  Clerk Authentication (@clerk/nextjs)                              │  │
-│  │  - User Authentication & Session Management                         │  │
-│  │  - Secure JWT token generation                                     │  │
-│  │  - Protected routes & API endpoints                                │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    ↓
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           API LAYER (tRPC)                                   │
-│                                                                              │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  tRPC Server (@trpc/server) - Type-safe RPC                        │  │
-│  │  ├─ Code Execution Procedures                                      │  │
-│  │  ├─ User Management Procedures                                     │  │
-│  │  ├─ Sandbox Templates Management                                   │  │
-│  │  └─ Real-time Updates                                              │  │
-│  │                                                                     │  │
-│  │  tRPC Client (@trpc/client + tanstack-react-query)                │  │
-│  │  - Automatic type inference from server                            │  │
-│  │  - Query caching & optimization                                   │  │
-│  │  - Real-time subscriptions                                         │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    ↓
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                      CODE EXECUTION ENGINE                                   │
-│                                                                              │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  E2B Code Interpreter (@e2b/code-interpreter)                      │  │
-│  │  - Sandbox Environment Creation                                     │  │
-│  │  - Multi-language Code Execution                                   │  │
-│  │  - Secure Isolated Execution                                       │  │
-│  │  - Execution Results & Error Handling                              │  │
-│  │                                                                     │  │
-│  │  Sandbox Templates (sandbox-templates/)                            │  │
-│  │  - Pre-configured execution environments                           │  │
-│  │  - Language-specific setup                                         │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    ↓
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        AI/AGENT LAYER                                        │
-│                                                                              │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  OpenAI Integration (@ai-sdk/openai)                               │  │
-│  │  - LLM-powered code generation                                     │  │
-│  │  - Natural language to code conversion                             │  │
-│  │  - Code analysis & suggestions                                     │  │
-│  │                                                                     │  │
-│  │  Inngest Agent Kit (@inngest/agent-kit)                            │  │
-│  │  - Workflow orchestration                                          │  │
-│  │  - Event-driven architecture                                       │  │
-│  │  - Background job processing                                       │  │
-│  │                                                                     │  │
-│  │  Inngest (@inngest/inngest)                                        │  │
-│  │  - Event scheduling & triggering                                   │  │
-│  │  - Durable execution                                               │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    ↓
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        DATABASE LAYER                                        │
-│                                                                              │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  Prisma ORM (@prisma/client)                                        │  │
-│  │  - Type-safe database access                                       │  │
-│  │  - Query builder & migrations                                      │  │
-│  │                                                                     │  │
-│  │  PostgreSQL Database (Prisma PG Adapter)                           │  │
-│  │  - User data & authentication                                      │  │
-│  │  - Code execution history                                          │  │
-│  │  - Sandbox templates & configurations                              │  │
-│  │  - Execution results & logs                                        │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    ↓
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    UTILITIES & HELPERS                                       │
-│                                                                              │
-│  ├─ Code Highlighting: Prism.js                                            │
-│  ├─ Charting: Recharts                                                     │
-│  ├─ Data Parsing: Superjson                                                │
-│  ├─ UI Components: Recharts, Embla Carousel, React Resizable Panels       │
-│  ├─ Notifications: Sonner                                                  │
-│  ├─ Date Utilities: date-fns                                               │
-│  └─ Validation: Zod schemas                                                │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                        FRONTEND (Next.js)                       │
+│          React Components + TanStack React Query               │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                      AUTHENTICATION (Clerk)                     │
+│                  Secure JWT Token Verification                 │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                      API LAYER (tRPC)                           │
+│              Type-Safe API Procedures & Validation             │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                   EVENT ORCHESTRATOR (Inngest)                  │
+│            Trigger Background Job / Agentic Workflow           │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+        ┌─────────────────────────────────────┐
+        │   INNGEST AGENTIC LOOP (Durable)   │
+        │                                     │
+        │  • AI (Gemini 2.0 via OpenRouter)  │
+        │  • Decides: Execute? Create files? │
+        │  • Loops until task complete       │
+        │                                     │
+        │  ├─ Terminal Tool → E2B Sandbox    │
+        │  ├─ File Tool → E2B Sandbox        │
+        │  └─ Feedback loop to AI            │
+        └─────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                   DATABASE (PostgreSQL)                         │
+│       Save Execution Results, History, & User Data             │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                    RESPONSE TO CLIENT                           │
+│         Display Results via tRPC + React Query Cache           │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### Data Flow
+### Data Flow (Simplified)
 
 ```
-User Action (e.g., "Execute Code")
+User submits code/prompt
            ↓
-    ┌──────────────────────┐
-    │  React Component     │
-    │  - Form Submission   │
-    └──────────────────────┘
+    Form Validation (Zod)
            ↓
-    ┌──────────────────────────────────┐
-    │  Zod Validation                  │
-    │  - Input Schema Validation       │
-    └──────────────────────────────────┘
+    tRPC Call to Backend
            ↓
-    ┌──────────────────────────────────┐
-    │  tRPC Client                     │
-    │  - Type-safe API call            │
-    └──────────────────────────────────┘
+    Clerk Auth Check
            ↓
-    ┌──────────────────────────────────┐
-    │  Clerk Auth Middleware           │
-    │  - Verify JWT Token              │
-    └──────────────────────────────────┘
+    Trigger Inngest Event
            ↓
-    ┌──────────────────────────────────┐
-    │  tRPC Server Router              │
-    │  - Route to appropriate handler  │
-    └──────────────────────────────────┘
+    ┌─────────────────────────────────┐
+    │  AI Agent Loop (Inngest)        │
+    │                                 │
+    │  AI receives prompt             │
+    │  ↓                              │
+    │  Decides: Run code or files?    │
+    │  ↓                              │
+    │  Tools execute in E2B Sandbox   │
+    │  ↓                              │
+    │  AI processes results           │
+    │  ↓                              │
+    │  Loop until complete            │
+    └─────────────────────────────────┘
            ↓
-    ┌──────────────────────────────────┐
-    │  Business Logic                  │
-    │  - Process code/request          │
-    └──────────────────────────────────┘
+    Save results to Database
            ↓
-         ┌─────────────────────────────────────┐
-         │  AI Decision Point                  │
-         │  - Should use AI? Should use E2B?   │
-         └─────────────────────────────────────┘
-         ↙                                    ↘
-    ┌──────────────┐              ┌──────────────────────┐
-    │ OpenAI Call  │              │  E2B Sandbox         │
-    │ - Generate   │              │  - Execute Code      │
-    │ - Analyze    │              │  - Capture Output    │
-    └──────────────┘              └──────────────────────┘
-         ↓                                    ↓
-    ┌──────────────────────────────────┐
-    │  Prisma ORM                      │
-    │  - Save Results to DB            │
-    └──────────────────────────────────┘
+    Return response to Client
            ↓
-    ┌──────────────────────────────────┐
-    │  Response to Client              │
-    │  - Return Results via tRPC       │
-    └──────────────────────────────────┘
+    Update UI with results
            ↓
-    ┌──────────────────────────────────┐
-    │  React Query Cache               │
-    │  - Update UI with results        │
-    └──────────────────────────────────┘
-           ↓
-    ┌──────────────────────────────────┐
-    │  Display to User                 │
-    │  - Show execution result         │
-    │  - Syntax highlighting           │
-    │  - Error visualization           │
-    └──────────────────────────────────┘
+    Display to User
 ```
 
 ## 📋 Technology Stack
@@ -210,14 +114,12 @@ User Action (e.g., "Execute Code")
 ### Authentication
 - **Clerk** - Enterprise-grade user management
 
-### Code Execution
+### Code Execution & AI
 - **E2B Code Interpreter** - Secure, multi-language sandboxing
-- **Sandbox Templates** - Pre-configured environments
-
-### AI & Automation
-- **OpenAI API** - LLM integration for code generation
-- **Inngest Agent Kit** - Workflow orchestration
-- **Inngest** - Event-driven background jobs
+- **Inngest Agent Kit** - Agentic workflow orchestration
+- **Inngest** - Event-driven, durable background jobs
+- **Google Gemini 2.0 Flash** (via OpenRouter) - LLM for code generation
+- **Sandbox Templates** - Pre-configured execution environments
 
 ### Database
 - **Prisma ORM** - Type-safe database access
@@ -243,7 +145,7 @@ User Action (e.g., "Execute Code")
 - ✅ **User Authentication** - Enterprise-grade auth with Clerk
 - ✅ **Execution History** - Full tracking and persistence
 - ✅ **Real-time Results** - Instant feedback on code execution
-- ✅ **Background Jobs** - Async workflows with Inngest
+- ✅ **Agentic Workflows** - AI-driven iterative task solving with Inngest
 - ✅ **Type-Safe APIs** - End-to-end TypeScript with tRPC
 - ✅ **Responsive UI** - Modern, accessible design with Radix UI
 - ✅ **Code Analytics** - Charting and visualization
@@ -282,8 +184,8 @@ User Action (e.g., "Execute Code")
    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
    CLERK_SECRET_KEY=your_clerk_secret
 
-   # OpenAI API
-   OPENAI_API_KEY=your_openai_key
+   # AI/LLM (Using OpenRouter for cost-effective models)
+   OPENROUTER_API_KEY=your_openrouter_key
 
    # E2B Sandbox
    E2B_API_KEY=your_e2b_key
@@ -331,7 +233,9 @@ genie/
 │   ├── app/               # App-level styles
 │   ├── lib/               # Utilities & helpers
 │   ├── hooks/             # Custom React hooks
-│   └── server/            # Server-side code
+│   ├── trpc/              # tRPC setup & routers
+│   ├── modules/           # Feature modules (messages, projects)
+│   └── inngest/           # Inngest functions & agents
 ├── prisma/                # Database schema & migrations
 ├── sandbox-templates/     # Pre-configured execution environments
 ├── public/                # Static assets
@@ -348,6 +252,7 @@ genie/
 - **Type Safety** - TypeScript prevents runtime errors
 - **Database Security** - Prisma with prepared statements
 - **Input Validation** - Zod schema validation
+- **Durable Workflows** - Inngest ensures reliable task execution
 
 ## 📊 Performance
 
@@ -356,6 +261,7 @@ genie/
 - **React Query Caching** - Minimized API calls
 - **Code Splitting** - Automatic with Next.js
 - **Database Indexing** - Optimized Prisma queries
+- **Durable Background Jobs** - Inngest handles long-running tasks without blocking
 
 ## 🚢 Deployment
 
@@ -384,6 +290,7 @@ npm start
 - [tRPC Documentation](https://trpc.io/docs)
 - [Clerk Documentation](https://clerk.com/docs)
 - [E2B Documentation](https://e2b.dev)
+- [Inngest Documentation](https://www.inngest.com/docs)
 
 ## 📄 License
 
