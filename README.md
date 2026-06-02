@@ -19,44 +19,44 @@ A modern, full-stack AI-powered code execution platform built with **Next.js 15*
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        FRONTEND (Next.js)                       │
-│          React Components + TanStack React Query               │
+│          React Components + TanStack React Query                │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
 │                      AUTHENTICATION (Clerk)                     │
-│                  Secure JWT Token Verification                 │
+│                  Secure JWT Token Verification                  │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
 │                      API LAYER (tRPC)                           │
-│              Type-Safe API Procedures & Validation             │
+│              Type-Safe API Procedures & Validation              │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
 │                   EVENT ORCHESTRATOR (Inngest)                  │
-│            Trigger Background Job / Agentic Workflow           │
+│            Trigger Background Job / Agentic Workflow            │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
         ┌─────────────────────────────────────┐
-        │   INNGEST AGENTIC LOOP (Durable)   │
+        │   INNGEST AGENTIC LOOP (Durable)    │
         │                                     │
-        │  • AI (Gemini 2.0 via OpenRouter)  │
-        │  • Decides: Execute? Create files? │
-        │  • Loops until task complete       │
+        │  • AI (Gemini 2.0 via OpenRouter)   │
+        │  • Decides: Execute? Create files?  │
+        │  • Loops until task complete        │
         │                                     │
-        │  ├─ Terminal Tool → E2B Sandbox    │
-        │  ├─ File Tool → E2B Sandbox        │
-        │  └─ Feedback loop to AI            │
+        │  ├─ Terminal Tool → E2B Sandbox     │
+        │  ├─ File Tool → E2B Sandbox         │
+        │  └─ Feedback loop to AI             │
         └─────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
 │                   DATABASE (PostgreSQL)                         │
-│       Save Execution Results, History, & User Data             │
+│       Save Execution Results, History, & User Data              │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
 │                    RESPONSE TO CLIENT                           │
-│         Display Results via tRPC + React Query Cache           │
+│         Display Results via tRPC + React Query Cache            │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
