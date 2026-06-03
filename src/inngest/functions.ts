@@ -1,6 +1,6 @@
 // src/inngest/functions.ts
 import { inngest } from "./client";
-import { createAgent, createTool, createNetwork, openai, type Tool } from "@inngest/agent-kit";
+import { createAgent, createTool, createNetwork, openai, gemini, type Tool } from "@inngest/agent-kit";
 import { Sandbox } from "@e2b/code-interpreter";
 import { getSandbox, lastAssistantTextMessageContent } from "./utils";
 import z from "zod";
@@ -25,16 +25,16 @@ export const codeAgentFunction = inngest.createFunction(
       name: 'codeAgent',
       description: "expert coding agent , use this to generate code for the prompt given to you",
       system: PROMPT,
-      // ========== OPTION 1: Groq (Llama 3.3 70B) - Free, 30 RPM ==========
-      // model: openai({
-      //   model: "llama-3.3-70b-versatile",
-      //   baseUrl: 'https://api.groq.com/openai/v1/',
-      //   apiKey: process.env.GROQ_API_KEY,
+      // ========== OPTION 1: Gemini 1.5 Flash ==========
+      // model: gemini({
+      //   model: ,
+
       // }),
 
-      // ========== OPTION 2: OpenRouter (Free Models) ==========
+
+      // ========== FALLBACK: Qwen3 Coder (Free, 1M context, coding-focused) ==========
       model: openai({
-        model: "google/gemini-2.0-flash-001",
+        model: "nvidia/nemotron-3-nano-30b-a3b:free",
         baseUrl: 'https://openrouter.ai/api/v1/',
         apiKey: process.env.OPENROUTER_API_KEY,
       }),

@@ -18,7 +18,7 @@ export const ProjectsList = () => {
     <div className="w-full bg-background/10 backdrop-blur-xl rounded-3xl p-8 border border-border/40 flex flex-col gap-y-6 sm:gap-y-4 shadow-2xl relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none -z-10" />
       <h2 className="text-2xl font-semibold">
-        {user?.firstName ? `${user.firstName}'s projects` : "Recent projects"}
+        {"Recent projects"}
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         {projects?.length === 0 && (

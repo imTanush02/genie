@@ -7,7 +7,7 @@ import { EyeIcon, CodeIcon, CrownIcon } from "lucide-react";
 
 import { Fragment } from "@/generated/prisma/client";
 import { Button } from "@/components/ui/button";
-// import { UserControl } from "@/components/user-control";
+import { UserControl } from "@/components/user-control";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ResizableHandle,
@@ -26,7 +26,7 @@ interface Props {
 };
 
 export const ProjectView = ({ projectId }: Props) => {
-  const { has } = useAuth();
+  const { has } = useAuth  ();
   const hasProAccess = has?.({ plan: "pro" });
 
   const [activeFragment, setActiveFragment] = useState<Fragment | null>(null);
@@ -80,14 +80,14 @@ export const ProjectView = ({ projectId }: Props) => {
                 </TabsTrigger>
               </TabsList>
               <div className="ml-auto flex items-center gap-x-2">
-                {!hasProAccess && (
+                {!hasProAccess && ( 
                   <Button asChild size="sm" variant="outline">
                     <Link href="/pricing">
                       <CrownIcon /> Upgrade
                     </Link>
                   </Button>
                 )}
-                {/* <UserControl /> */}
+                <UserControl />
               </div>
             </div>
             <TabsContent value="preview">
