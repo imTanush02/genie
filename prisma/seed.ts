@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from "../src/generated/prisma/client";
+import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import "dotenv/config";
 
@@ -10,43 +10,27 @@ const prisma = new PrismaClient({
   adapter,
 });
 
-const userData: Prisma.UserCreateInput[] = [
-  {
-    name: "Alice",
-    email: "alice@prisma.io",
-    posts: {
-      create: [
-        {
-          title: "Join the Prisma Discord",
-          content: "https://pris.ly/discord",
-          published: true,
-        },
-        {
-          title: "Prisma on YouTube",
-          content: "https://pris.ly/youtube",
-        },
-      ],
-    },
-  },
-  {
-    name: "Bob",
-    email: "bob@prisma.io",
-    posts: {
-      create: [
-        {
-          title: "Follow Prisma on Twitter",
-          content: "https://www.twitter.com/prisma",
-          published: true,
-        },
-      ],
-    },
-  },
-];
+async function main() {
+  console.log(`Seeding database...`);
 
-export async function main() {
-  for (const u of userData) {
-    await prisma.user.create({ data: u });
-  }
+  // Add seed data here if needed
+  // Example:
+  // await prisma.project.create({
+  //   data: {
+  //     name: "my-first-project",
+  //     userId: "user_xxx", // Clerk user ID
+  //   },
+  // });
+
+  console.log(`Seeding complete.`);
 }
 
-main();
+main()
+  .then(async () => {
+    await prisma.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });

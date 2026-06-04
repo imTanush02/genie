@@ -25,19 +25,19 @@ export const codeAgentFunction = inngest.createFunction(
       name: 'codeAgent',
       description: "expert coding agent , use this to generate code for the prompt given to you",
       system: PROMPT,
-      // ========== OPTION 1: Gemini 1.5 Flash ==========
-      // model: gemini({
-      //   model: ,
+      // ========== PRIMARY: Gemini 2.5 Flash (FREE, 1M context, excellent at coding) ==========
+      model: gemini({
+        model: "gemini-2.5-flash",
+        apiKey: process.env.GEMINI_API_KEY,
+      }),
 
+      // ========== ALT 1: Qwen3 Coder via OpenRouter (FREE, 1M context, coding-focused) ==========
+      // model: openai({
+      //   model: "qwen/qwen3-coder:free",
+      //   baseUrl: 'https://openrouter.ai/api/v1/',
+      //   apiKey: process.env.OPENROUTER_API_KEY,
       // }),
 
-
-      // ========== FALLBACK: Qwen3 Coder (Free, 1M context, coding-focused) ==========
-      model: openai({
-        model: "nvidia/nemotron-3-nano-30b-a3b:free",
-        baseUrl: 'https://openrouter.ai/api/v1/',
-        apiKey: process.env.OPENROUTER_API_KEY,
-      }),
       tools: [
         createTool({
           name: 'terminal',

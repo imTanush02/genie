@@ -44,12 +44,12 @@ export const ProjectForm = () => {
       router.push(`/projects/${data.id}`);
     },
     onError: (error) => {
-      toast.error(error.message);
       
+      toast.error(error.message);
       if (error.data?.code === "UNAUTHORIZED") {
         clerk.openSignIn();
       }
-
+      
       if (error.data?.code === "TOO_MANY_REQUESTS") {
         router.push("/pricing");
       }
