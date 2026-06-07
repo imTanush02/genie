@@ -23,9 +23,7 @@ const Page = () => {
         
         <div className="space-y-4 text-center z-10">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
-            Build something with{" "}
-            
-              Genie
+            Make a Wish
           
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-medium animate-in fade-in slide-in-from-bottom-5 duration-1000 delay-150 fill-mode-both">

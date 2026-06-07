@@ -1,6 +1,6 @@
 // src/inngest/functions.ts
 import { inngest } from "./client";
-import { createAgent, createTool, createNetwork, openai, gemini, type Tool } from "@inngest/agent-kit";
+import { createAgent, createTool,createState, createNetwork, openai, gemini, type Tool  , type Message } from "@inngest/agent-kit";
 import { Sandbox } from "@e2b/code-interpreter";
 import { getSandbox, lastAssistantTextMessageContent } from "./utils";
 import z from "zod";
@@ -21,6 +21,41 @@ export const codeAgentFunction = inngest.createFunction(
       })
       return sandbox.sandboxId
     })
+    const previousMessages = await step.run("get-previous-messages", async () => {
+      const formattedMessages: Message[] = [];
+
+      const messages = await prisma.message.findMany({
+        where: {
+          projectId: event.data.projectId,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: 5,
+      });
+
+      for (const message of messages) {
+        formattedMessages.push({
+          type: "text",
+          role: message.role === "ASSISTANT" ? "assistant" : "user",
+          content: message.content,
+        })
+      }
+
+      return formattedMessages.reverse();
+    });
+
+    const state = createState<AgentState>(
+      {
+        summary: "",
+        files: {},
+      },
+      {
+        messages: previousMessages,
+      },
+    );
+
+
     const codeAgent = createAgent<AgentState>({
       name: 'codeAgent',
       description: "expert coding agent , use this to generate code for the prompt given to you",
@@ -146,6 +181,7 @@ export const codeAgentFunction = inngest.createFunction(
       name: "coding-agent-network",
       agents: [codeAgent],
       maxIter: 15,
+      defaultState : state,
       router: async ({ network }) => {
         const summary = network.state.data.summary
         if (summary) {
@@ -159,7 +195,7 @@ export const codeAgentFunction = inngest.createFunction(
     let networkError: string | null = null;
 
     try {
-      result = await network.run(event.data.value);
+      result = await network.run(event.data.value , {state});
       console.log("network result: ", result);
     } catch (err) {
       networkError = err instanceof Error ? err.message : "Task failed.";

@@ -80,13 +80,13 @@ export const ProjectView = ({ projectId }: Props) => {
                 </TabsTrigger>
               </TabsList>
               <div className="ml-auto flex items-center gap-x-2">
-                {!hasProAccess && ( 
+                {/* {!hasProAccess && ( 
                   <Button asChild size="sm" variant="outline">
                     <Link href="/pricing">
                       <CrownIcon /> Upgrade
                     </Link>
                   </Button>
-                )}
+                )} */}
                 <UserControl />
               </div>
             </div>
