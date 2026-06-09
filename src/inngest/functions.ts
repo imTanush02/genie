@@ -2,9 +2,9 @@
 import { inngest } from "./client";
 import { createAgent, createTool,createState, createNetwork, openai, gemini, type Tool  , type Message } from "@inngest/agent-kit";
 import { Sandbox } from "@e2b/code-interpreter";
-import { getSandbox, lastAssistantTextMessageContent } from "./utils";
+import { getSandbox, lastAssistantTextMessageContent, parseAgentOutput } from "./utils";
 import z from "zod";
-import { PROMPT } from "@/prompt";
+import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from "@/prompt";
 import prisma from "@/lib/db";
 
 interface AgentState {
@@ -17,7 +17,7 @@ export const codeAgentFunction = inngest.createFunction(
   async ({ event, step }) => {
     const sandboxId = await step.run("get-sandbox-id", async () => {
       const sandbox = await Sandbox.create({
-        template: "tanushsingh843/genie-nextjs-test2"
+        template: "tanushsingh843/genie-nextjs-test2" 
       })
       return sandbox.sandboxId
     })
@@ -60,18 +60,18 @@ export const codeAgentFunction = inngest.createFunction(
       name: 'codeAgent',
       description: "expert coding agent , use this to generate code for the prompt given to you",
       system: PROMPT,
-      // ========== PRIMARY: Gemini 2.5 Flash (FREE, 1M context, excellent at coding) ==========
-      model: gemini({
-        model: "gemini-2.5-flash",
-        apiKey: process.env.GEMINI_API_KEY,
-      }),
-
-      // ========== ALT 1: Qwen3 Coder via OpenRouter (FREE, 1M context, coding-focused) ==========
-      // model: openai({
-      //   model: "qwen/qwen3-coder:free",
-      //   baseUrl: 'https://openrouter.ai/api/v1/',
-      //   apiKey: process.env.OPENROUTER_API_KEY,
+      // ========== PRIMARY: Gemini 2.5 Flash (PAID/LIMITED FREE TIER) ==========
+      // model: gemini({
+      //   model: "gemini-2.5-flash",
+      //   apiKey: process.env.GEMINI_API_KEY,
       // }),
+
+      // ========== DEV: Qwen3 Coder via OpenRouter (FREE, 1M context, coding-focused) ==========
+      model: openai({
+        model: "qwen/qwen3-coder:free",
+        baseUrl: 'https://openrouter.ai/api/v1/',
+        apiKey: process.env.OPENROUTER_API_KEY,
+      }),
 
       tools: [
         createTool({
@@ -193,14 +193,43 @@ export const codeAgentFunction = inngest.createFunction(
 
     let result: Awaited<ReturnType<typeof network.run>>;
     let networkError: string | null = null;
+    let fragmentTitleOuput: Message[] | undefined;
+    let responseOutput: Message[] | undefined;
 
+    const fragmentTitleGenerator = createAgent({
+      name: "fragment-title-generator",
+      description: "A fragment title generator",
+      system: FRAGMENT_TITLE_PROMPT,
+      model: openai({ 
+        model: "meta-llama/llama-4-maverick:free",
+        baseUrl: 'https://openrouter.ai/api/v1/',
+        apiKey: process.env.OPENROUTER_API_KEY,
+      }),
+    })
+
+    const responseGenerator = createAgent({
+      name: "response-generator",
+      description: "A response generator",
+      system: RESPONSE_PROMPT,
+      model: openai({ 
+        model: "meta-llama/llama-4-maverick:free",
+        baseUrl: 'https://openrouter.ai/api/v1/',
+        apiKey: process.env.OPENROUTER_API_KEY,
+      }),
+    });
+
+    
     try {
       result = await network.run(event.data.value , {state});
       console.log("network result: ", result);
+
+      ({ output: fragmentTitleOuput } = await fragmentTitleGenerator.run(result.state.data.summary));
+      ({ output: responseOutput } = await responseGenerator.run(result.state.data.summary));
     } catch (err) {
       networkError = err instanceof Error ? err.message : "Task failed.";
       console.error("network error: ", err);
     }
+
 
     const sandboxUrl = await step.run("get-sandbox-url", async () => {
       const sandbox = await getSandbox(sandboxId);
@@ -219,22 +248,22 @@ export const codeAgentFunction = inngest.createFunction(
           }
         })
       }
-      return await prisma.message.create({
+       return await prisma.message.create({
         data: {
-          content: result!.state.data.summary ?? "Task completed.",
-          type: "RESULT",
-          role: "ASSISTANT",
           projectId: event.data.projectId,
+          content: parseAgentOutput(responseOutput!),
+          role: "ASSISTANT",
+          type: "RESULT",
           fragment: {
             create: {
               sandboxUrl: sandboxUrl,
-              files: result!.state.data.files ?? {},
-              title: "fragment"
-            }
-          }
-        }
+              title: parseAgentOutput(fragmentTitleOuput!),
+              files: result!.state.data.files,
+            },
+          },
+        },
       })
-    })
+    });
 
     return {
       url: sandboxUrl,
