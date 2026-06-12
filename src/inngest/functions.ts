@@ -2,7 +2,7 @@
 import { inngest } from "./client";
 import { createAgent, createTool,createState, createNetwork, openai, gemini, type Tool  , type Message } from "@inngest/agent-kit";
 import { Sandbox } from "@e2b/code-interpreter";
-import { getSandbox, lastAssistantTextMessageContent, parseAgentOutput } from "./utils";
+import { getSandbox, lastAssistantTextMessageContent, parseAgentOutput, retryWithBackoff } from "./utils";
 import z from "zod";
 import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from "@/prompt";
 import prisma from "@/lib/db";
@@ -61,17 +61,17 @@ export const codeAgentFunction = inngest.createFunction(
       description: "expert coding agent , use this to generate code for the prompt given to you",
       system: PROMPT,
       // ========== PRIMARY: Gemini 2.5 Flash (PAID/LIMITED FREE TIER) ==========
-      // model: gemini({
-      //   model: "gemini-2.5-flash",
-      //   apiKey: process.env.GEMINI_API_KEY,
-      // }),
-
-      // ========== DEV: Qwen3 Coder via OpenRouter (FREE, 1M context, coding-focused) ==========
-      model: openai({
-        model: "qwen/qwen3-coder:free",
-        baseUrl: 'https://openrouter.ai/api/v1/',
-        apiKey: process.env.OPENROUTER_API_KEY,
+      model: gemini({
+        model: "gemini-2.5-flash",
+        apiKey: process.env.GEMINI_API_KEY,
       }),
+
+      // ========== DEV: GPT-OSS 120B via OpenRouter (FREE, agentic coding, tool support) ==========
+      // model: openai({
+      //   model: "openai/gpt-oss-120b:free",
+      //   baseUrl: 'https://openrouter.ai/api/v1/',
+      //   apiKey: process.env.OPENROUTER_API_KEY,
+      // }),
 
       tools: [
         createTool({
@@ -201,7 +201,7 @@ export const codeAgentFunction = inngest.createFunction(
       description: "A fragment title generator",
       system: FRAGMENT_TITLE_PROMPT,
       model: openai({ 
-        model: "meta-llama/llama-4-maverick:free",
+        model: "nvidia/nemotron-nano-9b-v2:free",
         baseUrl: 'https://openrouter.ai/api/v1/',
         apiKey: process.env.OPENROUTER_API_KEY,
       }),
@@ -212,7 +212,7 @@ export const codeAgentFunction = inngest.createFunction(
       description: "A response generator",
       system: RESPONSE_PROMPT,
       model: openai({ 
-        model: "meta-llama/llama-4-maverick:free",
+        model: "nvidia/nemotron-nano-9b-v2:free",
         baseUrl: 'https://openrouter.ai/api/v1/',
         apiKey: process.env.OPENROUTER_API_KEY,
       }),
@@ -220,11 +220,11 @@ export const codeAgentFunction = inngest.createFunction(
 
     
     try {
-      result = await network.run(event.data.value , {state});
+      result = await retryWithBackoff(() => network.run(event.data.value , {state}));
       console.log("network result: ", result);
 
-      ({ output: fragmentTitleOuput } = await fragmentTitleGenerator.run(result.state.data.summary));
-      ({ output: responseOutput } = await responseGenerator.run(result.state.data.summary));
+      ({ output: fragmentTitleOuput } = await retryWithBackoff(() => fragmentTitleGenerator.run(result.state.data.summary)));
+      ({ output: responseOutput } = await retryWithBackoff(() => responseGenerator.run(result.state.data.summary)));
     } catch (err) {
       networkError = err instanceof Error ? err.message : "Task failed.";
       console.error("network error: ", err);
