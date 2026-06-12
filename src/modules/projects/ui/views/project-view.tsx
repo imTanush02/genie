@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { EyeIcon, CodeIcon, DownloadIcon } from "lucide-react";
 
 import { Fragment } from "@/generated/prisma/client";
+import { Button } from "@/components/ui/button";
 import { UserControl } from "@/components/user-control";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -17,6 +18,7 @@ import { ProjectHeader } from "../components/project-header";
 import { MessagesContainer } from "../components/messages-container";
 import { ErrorBoundary } from "react-error-boundary";
 import { FileExplorer } from "@/components/file-explorer";
+import { NEXTJS_BOILERPLATE } from "@/lib/boilerplate";
 
 interface Props {
   projectId: string;
@@ -25,6 +27,30 @@ interface Props {
 export const ProjectView = ({ projectId }: Props) => {
   const [activeFragment, setActiveFragment] = useState<Fragment | null>(null);
   const [tabState, setTabState] = useState<"preview" | "code">("preview");
+
+  const handleDownload = async () => {
+    if (!activeFragment?.files) return;
+    const JSZip = (await import("jszip")).default;
+    const zip = new JSZip();
+    
+    // Merge boilerplate and generated files (generated files override boilerplate)
+    const allFiles = {
+      ...NEXTJS_BOILERPLATE,
+      ...(activeFragment.files as Record<string, string>)
+    };
+
+    Object.entries(allFiles).forEach(([path, content]) => {
+      zip.file(path, content);
+    });
+    
+    const blob = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `project-${projectId}.zip`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="h-screen">
@@ -69,16 +95,16 @@ export const ProjectView = ({ projectId }: Props) => {
                 <TabsTrigger value="preview" className="rounded-md">
                   <EyeIcon /> <span>Demo</span>
                 </TabsTrigger>
-                
+                <TabsTrigger value="code" className="rounded-md">
+                  <CodeIcon /> <span>Code</span>
+                </TabsTrigger>
               </TabsList>
               <div className="ml-auto flex items-center gap-x-2">
-                {/* {!hasProAccess && ( 
-                  <Button asChild size="sm" variant="outline">
-                    <Link href="/pricing">
-                      <CrownIcon /> Upgrade
-                    </Link>
+                {!!activeFragment?.files && Object.keys(activeFragment.files).length > 0 && (
+                  <Button size="sm" variant="outline" onClick={handleDownload} className="gap-x-2">
+                    <DownloadIcon className="size-4" /> <span>Download</span>
                   </Button>
-                )} */}
+                )}
                 <UserControl />
               </div>
             </div>
