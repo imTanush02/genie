@@ -1,9 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
 import { Suspense, useState } from "react";
-import { EyeIcon, CodeIcon, CrownIcon, DownloadIcon } from "lucide-react";
+import { EyeIcon, CodeIcon, DownloadIcon } from "lucide-react";
 
 import { Fragment } from "@/generated/prisma/client";
 import { Button } from "@/components/ui/button";
@@ -27,9 +25,6 @@ interface Props {
 };
 
 export const ProjectView = ({ projectId }: Props) => {
-  const { has } = useAuth  ();
-  const hasProAccess = has?.({ plan: "pro" });
-
   const [activeFragment, setActiveFragment] = useState<Fragment | null>(null);
   const [tabState, setTabState] = useState<"preview" | "code">("preview");
 
