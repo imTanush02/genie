@@ -1,10 +1,5 @@
-import Link from "next/link";
 import { useMemo } from "react";
-import { useAuth } from "@clerk/nextjs";
-import { CrownIcon } from "lucide-react";
 import { formatDuration, intervalToDuration } from "date-fns";
-
-import { Button } from "@/components/ui/button";
 
 interface Props {
   points: number;
@@ -12,8 +7,7 @@ interface Props {
 };
 
 export const Usage = ({ points, msBeforeNext }: Props) => {
-  const { has } = useAuth();
-  const hasProAccess = has?.({ plan: "pro" });
+
 
   const resetTime = useMemo(() => {
     try {
@@ -41,18 +35,7 @@ export const Usage = ({ points, msBeforeNext }: Props) => {
             Resets in{" "}{resetTime}
           </p>
         </div>
-        {!hasProAccess && (
-          <Button
-            asChild
-            size="sm"
-            variant="secondary"
-            className="ml-auto"
-          >
-            <Link href="/pricing">
-              <CrownIcon /> Upgrade
-            </Link>
-          </Button>
-        )}
+      
       </div>
     </div>
   );
