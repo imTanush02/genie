@@ -61,7 +61,8 @@ export function FragmentWeb({ data }: Props) {
       <iframe
         key={fragmentKey}
         className="h-full w-full"
-        sandbox="allow-forms allow-scripts allow-same-origin"
+        sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-modals allow-downloads"
+        allow="clipboard-read; clipboard-write; microphone; camera; geolocation"
         loading="lazy"
         src={data.sandboxUrl}
       />
