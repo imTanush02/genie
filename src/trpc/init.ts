@@ -3,7 +3,7 @@ import { initTRPC, TRPCError } from '@trpc/server';
 import { cache } from 'react';
 import superjson from "superjson";
 export const createTRPCContext = cache(async () => {
-  return { auth: await auth() };
+  return { auth: await auth() }; // ← Clerk auth info goes into context
 });
 export type Context = Awaited<ReturnType<typeof createTRPCContext>>;
 // Avoid exporting the entire t-object
@@ -14,7 +14,7 @@ const t = initTRPC.context<Context>().create({
   /**
    * @see https://trpc.io/docs/server/data-transformers
    */
-  transformer: superjson,
+  transformer: superjson, // ← Handles Dates, Maps, etc. that JSON can't
 });
 
 const isAuthed = t.middleware(({ next, ctx }) => {
@@ -33,6 +33,7 @@ const isAuthed = t.middleware(({ next, ctx }) => {
 });
 
 // Base router and procedure helpers
-export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
-export const protectedProcedure = t.procedure.use(isAuthed);
+// Step D: Export the building blocks
+export const createTRPCRouter = t.router;         // ← factory to create routers
+export const protectedProcedure = t.procedure.use(isAuthed);  // ← procedure with auth check baked in

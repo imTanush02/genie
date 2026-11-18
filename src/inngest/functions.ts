@@ -68,9 +68,9 @@ export const codeAgentFunction = inngest.createFunction(
 
       // ========== DEV: GPT-OSS 120B via OpenRouter (FREE, agentic coding, tool support) ==========
       // model: openai({
-      //   model: "openai/gpt-oss-120b:free",
-      //   baseUrl: 'https://openrouter.ai/api/v1/',
-      //   apiKey: process.env.OPENROUTER_API_KEY,
+      //   model: "nvidia/nemotron-3-ultra-550b-a55b",
+      //   baseUrl: 'https://integrate.api.nvidia.com/v1',
+      //   apiKey: process.env.NVIDIA_API_KEY,
       // }),
 
       tools: [

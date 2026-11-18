@@ -6,7 +6,7 @@ import { protectedProcedure, createTRPCRouter } from "@/trpc/init";
 import prisma from "@/lib/db";
 
 export const projectsRouter = createTRPCRouter({
-  getOne: protectedProcedure
+  getOne: protectedProcedure // Read one project
     .input(
       z.object({          
         id: z.string().min(1, { message: "id is Required" }),

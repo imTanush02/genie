@@ -5,17 +5,17 @@ import prisma from "@/lib/db";
 import { TRPCError } from "@trpc/server";
 
 export const messageRouter = createTRPCRouter({
-  getMany: protectedProcedure
+  getMany: protectedProcedure // ← Must be logged in
     .input(
-      z.object({          
+      z.object({      // ← Input validation: requires projectId     
         projectId: z.string().min(1, { message: "Project is Required" }),
       }),
     )
-    .query(async ({input , ctx}) => {
+    .query(async ({input , ctx}) => { // ← .query = this is a READ operation
       const messages = await prisma.message.findMany({
         where :{
           projectId:input.projectId,
-          project :{
+          project :{// ← Only YOUR messages
             userId: ctx.auth.userId!,
           }
         },
@@ -26,10 +26,10 @@ export const messageRouter = createTRPCRouter({
           fragment: true,
         },
       });
-      return messages;
+      return messages;// ← This is what the client receives
     }),
   create: protectedProcedure
-    .input(
+    .input(  // ← Requires value + projectId
       z.object({
         value: z
           .string()
@@ -38,7 +38,7 @@ export const messageRouter = createTRPCRouter({
         projectId: z.string().min(1, { message: "Project is Required" }),
       }),
     )
-    .mutation(async ({ input,ctx }) => {
+    .mutation(async ({ input,ctx }) => { // ← .mutation = this WRITES data
       const existingProject = await prisma.project.findUnique({
         where : {
           id: input.projectId,

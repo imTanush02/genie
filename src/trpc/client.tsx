@@ -11,7 +11,7 @@ import { makeQueryClient } from './query-client';
 import type { AppRouter } from './routers/_app';
  
 export const { TRPCProvider, useTRPC } = createTRPCContext<AppRouter>();
- 
+ //                                        ↑ AppRouter TYPE = full type safety!
 let browserQueryClient: QueryClient;
 function getQueryClient() {
   if (typeof window === 'undefined') {
@@ -46,12 +46,13 @@ export function TRPCReactProvider(
   //       render if it suspends and there is no boundary
   const queryClient = getQueryClient();
  
+  // Creates the tRPC client that knows how to talk to /api/trpc
   const [trpcClient] = useState(() =>
     createTRPCClient<AppRouter>({
       links: [
         httpBatchLink({
           transformer: superjson,
-          url: getUrl(),
+          url: getUrl(),   // ← Points to /api/trpc
         }),
       ],
     }),
